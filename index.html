@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo лист</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .todo-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+        .input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        #taskInput {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 30px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        #taskInput:focus {
+            border-color: #6c63ff;
+        }
+        #addBtn {
+            background: #6c63ff;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 0 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: 600;
+        }
+        #addBtn:hover {
+            background: #5a52d5;
+        }
+        .task-list {
+            list-style: none;
+        }
+        .task-item {
+            display: flex;
+            align-items: center;
+            background: #f9f9f9;
+            border-radius: 30px;
+            padding: 8px 15px;
+            margin-bottom: 10px;
+            transition: box-shadow 0.3s;
+        }
+        .task-item:hover {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .task-item .checkbox {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .task-text {
+            flex: 1;
+            font-size: 16px;
+            color: #333;
+            word-break: break-word;
+            padding-right: 10px;
+        }
+        .task-text.completed {
+            text-decoration: line-through;
+            color: #999;
+        }
+        .delete-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #ff6b6b;
+            padding: 0 5px;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+        }
+        .delete-btn:hover {
+            color: #ff3838;
+            background-color: rgba(255,107,107,0.1);
+        }
+        .empty-message {
+            text-align: center;
+            color: #aaa;
+            font-style: italic;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="todo-container">
+        <h1>Мои задачи</h1>
+        <div class="input-section">
+            <input type="text" id="taskInput" placeholder="Введите новую задачу..." autofocus>
+            <button id="addBtn">Добавить</button>
+        </div>
+        <ul class="task-list" id="taskList">
+            <!-- Сюда будут добавляться задачи -->
+        </ul>
+        <div class="empty-message" id="emptyMessage">Список задач пуст</div>
+    </div>
+
+    <script>
+        // Получаем элементы
+        const taskInput = document.getElementById('taskInput');
+        const addBtn = document.getElementById('addBtn');
+        const taskList = document.getElementById('taskList');
+        const emptyMessage = document.getElementById('emptyMessage');
+
+        // Функция для проверки и обновления отображения пустого списка
+        function updateEmptyMessage() {
+            if (taskList.children.length === 0) {
+                emptyMessage.style.display = 'block';
+            } else {
+                emptyMessage.style.display = 'none';
+            }
+        }
+
+        // Функция добавления новой задачи
+        function addTask(taskText) {
+            // Создаём элементы
+            const li = document.createElement('li');
+            li.className = 'task-item';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'checkbox';
+
+            const span = document.createElement('span');
+            span.className = 'task-text';
+            span.textContent = taskText;
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.innerHTML = '&times;'; // символ ×
+            deleteBtn.setAttribute('aria-label', 'Удалить задачу');
+
+            // Собираем элемент
+            li.appendChild(checkbox);
+            li.appendChild(span);
+            li.appendChild(deleteBtn);
+
+            // Добавляем в список
+            taskList.appendChild(li);
+
+            // Обновляем сообщение о пустом списке
+            updateEmptyMessage();
+        }
+
+        // Обработчик нажатия на кнопку "Добавить"
+        addBtn.addEventListener('click', () => {
+            const text = taskInput.value.trim();
+            if (text === '') {
+                alert('Введите текст задачи!');
+                return;
+            }
+            addTask(text);
+            taskInput.value = ''; // очищаем поле
+            taskInput.focus();
+        });
+
+        // Обработчик нажатия Enter в поле ввода
+        taskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addBtn.click();
+            }
+        });
+
+        // Делегирование событий для списка задач (отметка и удаление)
+        taskList.addEventListener('change', (e) => {
+            if (e.target.classList.contains('checkbox')) {
+                // Переключаем класс completed у соседнего span
+                const span = e.target.nextElementSibling;
+                if (span && span.classList.contains('task-text')) {
+                    span.classList.toggle('completed', e.target.checked);
+                }
+            }
+        });
+
+        taskList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-btn')) {
+                const li = e.target.closest('.task-item');
+                if (li) {
+                    li.remove();
+                    updateEmptyMessage();
+                }
+            }
+        });
+
+        // Инициализация: показываем сообщение, если список пуст (так и есть)
+        updateEmptyMessage();
+    </script>
+</body>
+</html>
